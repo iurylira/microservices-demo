@@ -615,7 +615,7 @@ Branch for every commit: `claude/elegant-edison-99ry8y` (never `main`; no merge 
 - [x] P3-11 (implementation) cartservice delete Spanner/AlloyDB stores + Startup branches  -> maps T-008, T-010, T-013, T-014
 
 ### Batch B4 — implementation: Node, Python, templates, adservice source (1 coder dispatch, serial)
-- [ ] P3-12 (implementation) currencyservice remove profiler + trace-agent code  -> maps T-001, T-004
+- [x] P3-12 (implementation) currencyservice remove profiler + trace-agent code  -> maps T-001, T-004
 - [ ] P3-13 (implementation) paymentservice remove profiler code  -> maps T-001, T-004
 - [ ] P3-14 (implementation) emailservice drop Google exceptions + dead profiler  -> maps T-001, T-005
 - [ ] P3-15 (implementation) recommendationservice drop Google exception + dead profiler  -> maps T-001, T-005
