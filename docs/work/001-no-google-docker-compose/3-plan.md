@@ -596,10 +596,10 @@ This container has `go` (auto-downloads the pinned `go1.26.4` toolchain), `node`
 Branch for every commit: `claude/elegant-edison-99ry8y` (never `main`; no merge step).
 
 ### Batch B0 — baseline (orchestrator only, no dispatch)
-- [ ] P3-01 (baseline) verify Go/Node/Python/Java green, record `dotnet` absent + T-001 baseline (38 files)
+- [x] P3-01 (baseline) verify Go/Node/Python/Java green, record `dotnet` absent + T-001 baseline (38 files)
 
 ### Batch B1 — seams (1 coder dispatch, serial)
-- [ ] P3-02 (seams) frontend: move logger into `logger.go` as a package-level var initialiser (not `init()`)
+- [x] P3-02 (seams) frontend: move logger into `logger.go` as a package-level var initialiser (not `init()`)
 
 ### Batch B2 — red tests (1 coder dispatch, serial) [expected-red] — first attempts .NET 10 SDK install (Environment note 1)
 - [ ] P3-03 (red-tests) [expected-red] productcatalogservice loader specs  -> maps T-011, T-012
