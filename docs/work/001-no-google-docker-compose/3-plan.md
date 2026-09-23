@@ -629,7 +629,7 @@ Branch for every commit: `claude/elegant-edison-99ry8y` (never `main`; no merge 
 - [x] P3-21 (implementation) [high-risk] shippingservice go mod tidy  -> maps T-002, T-009
 - [x] P3-22 (implementation) [high-risk] cartservice csproj drop Google/Npgsql packages  -> maps T-008, T-010
 - [x] P3-23 (implementation) [high-risk] currencyservice drop @google-cloud deps + regen lockfile  -> maps T-001, T-004, T-019
-- [ ] P3-24 (implementation) [high-risk] paymentservice drop @google-cloud dep + regen lockfile  -> maps T-001, T-004, T-019
+- [x] P3-24 (implementation) [high-risk] paymentservice drop @google-cloud dep + regen lockfile  -> maps T-001, T-004, T-019
 - [ ] P3-25 (implementation) [high-risk] emailservice drop google deps + recompile requirements  -> maps T-001, T-005, T-019
 - [ ] P3-26 (implementation) [high-risk] recommendationservice drop google-api-core + recompile requirements  -> maps T-001, T-005, T-019
 
