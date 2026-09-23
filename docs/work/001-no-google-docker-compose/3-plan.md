@@ -602,7 +602,7 @@ Branch for every commit: `claude/elegant-edison-99ry8y` (never `main`; no merge 
 - [x] P3-02 (seams) frontend: move logger into `logger.go` as a package-level var initialiser (not `init()`)
 
 ### Batch B2 — red tests (1 coder dispatch, serial) [expected-red] — first attempts .NET 10 SDK install (Environment note 1)
-- [ ] P3-03 (red-tests) [expected-red] productcatalogservice loader specs  -> maps T-011, T-012
+- [x] P3-03 (red-tests) [expected-red] productcatalogservice loader specs  -> maps T-011, T-012
 - [ ] P3-04 (red-tests) [expected-red] cartservice Spanner/AlloyDB env selects nothing (unverified-here without SDK)  -> maps T-014
 
 ### Batch B3 — implementation: Go services + cartservice source (1 coder dispatch, serial)
