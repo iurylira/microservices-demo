@@ -21,7 +21,6 @@ import (
 	"os"
 	"time"
 
-	"cloud.google.com/go/profiler"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -117,13 +116,6 @@ func main() {
 		log.Info("Tracing disabled.")
 	}
 
-	if os.Getenv("ENABLE_PROFILER") == "1" {
-		log.Info("Profiling enabled.")
-		go initProfiling(log, "frontend", "1.0.0")
-	} else {
-		log.Info("Profiling disabled.")
-	}
-
 	srvPort := port
 	if os.Getenv("PORT") != "" {
 		srvPort = os.Getenv("PORT")
@@ -189,29 +181,6 @@ func initTracing(log logrus.FieldLogger, ctx context.Context, svc *frontendServe
 	otel.SetTracerProvider(tp)
 
 	return tp, err
-}
-
-func initProfiling(log logrus.FieldLogger, service, version string) {
-	// TODO(ahmetb) this method is duplicated in other microservices using Go
-	// since they are not sharing packages.
-	for i := 1; i <= 3; i++ {
-		log = log.WithField("retry", i)
-		if err := profiler.Start(profiler.Config{
-			Service:        service,
-			ServiceVersion: version,
-			// ProjectID must be set if not running on GCP.
-			// ProjectID: "my-project",
-		}); err != nil {
-			log.Warnf("warn: failed to start profiler: %+v", err)
-		} else {
-			log.Info("started Stackdriver profiler")
-			return
-		}
-		d := time.Second * 10 * time.Duration(i)
-		log.Debugf("sleeping %v to retry initializing Stackdriver profiler", d)
-		time.Sleep(d)
-	}
-	log.Warn("warning: could not initialize Stackdriver profiler after retrying, giving up")
 }
 
 func mustMapEnv(target *string, envKey string) {

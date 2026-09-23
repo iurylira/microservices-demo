@@ -609,7 +609,7 @@ Branch for every commit: `claude/elegant-edison-99ry8y` (never `main`; no merge 
 - [x] P3-05 (implementation) productcatalogservice always loads products.json  -> maps T-011, T-012, T-009
 - [x] P3-06 (implementation) productcatalogservice remove Cloud Profiler  -> maps T-001, T-009
 - [x] P3-07 (implementation) frontend remove GCP metadata / deployment detection  -> maps T-001, T-009, T-020
-- [ ] P3-08 (implementation) frontend remove Cloud Profiler  -> maps T-001, T-009
+- [x] P3-08 (implementation) frontend remove Cloud Profiler  -> maps T-001, T-009
 - [ ] P3-09 (implementation) checkoutservice remove Cloud Profiler  -> maps T-001, T-009
 - [ ] P3-10 (implementation) shippingservice remove Cloud Profiler  -> maps T-001, T-009
 - [ ] P3-11 (implementation) cartservice delete Spanner/AlloyDB stores + Startup branches  -> maps T-008, T-010, T-013, T-014
