@@ -623,7 +623,7 @@ Branch for every commit: `claude/elegant-edison-99ry8y` (never `main`; no merge 
 - [x] P3-17 (implementation) adservice neutral trace log keys  -> maps T-001, T-007
 
 ### Batch B5 — implementation: dependency manifests & lockfiles (1 coder dispatch, serial) [high-risk]
-- [ ] P3-18 (implementation) [high-risk] frontend go mod tidy  -> maps T-002, T-009
+- [x] P3-18 (implementation) [high-risk] frontend go mod tidy  -> maps T-002, T-009
 - [ ] P3-19 (implementation) [high-risk] checkoutservice go mod tidy  -> maps T-002, T-009
 - [ ] P3-20 (implementation) [high-risk] productcatalogservice go mod tidy  -> maps T-002, T-009
 - [ ] P3-21 (implementation) [high-risk] shippingservice go mod tidy  -> maps T-002, T-009
