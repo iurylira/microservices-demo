@@ -620,7 +620,7 @@ Branch for every commit: `claude/elegant-edison-99ry8y` (never `main`; no merge 
 - [x] P3-14 (implementation) emailservice drop Google exceptions + dead profiler  -> maps T-001, T-005
 - [x] P3-15 (implementation) recommendationservice drop Google exception + dead profiler  -> maps T-001, T-005
 - [x] P3-16 (implementation) system font stack instead of Google Fonts  -> maps T-001, T-006, T-024
-- [ ] P3-17 (implementation) adservice neutral trace log keys  -> maps T-001, T-007
+- [x] P3-17 (implementation) adservice neutral trace log keys  -> maps T-001, T-007
 
 ### Batch B5 — implementation: dependency manifests & lockfiles (1 coder dispatch, serial) [high-risk]
 - [ ] P3-18 (implementation) [high-risk] frontend go mod tidy  -> maps T-002, T-009
