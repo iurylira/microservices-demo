@@ -634,7 +634,7 @@ Branch for every commit: `claude/elegant-edison-99ry8y` (never `main`; no merge 
 - [x] P3-26 (implementation) [high-risk] recommendationservice drop google-api-core + recompile requirements  -> maps T-001, T-005, T-019
 
 ### Batch B6 — implementation: images & Compose (1 coder dispatch, serial) [high-risk]
-- [ ] P3-27 (implementation) [high-risk] Go Dockerfiles alpine runtime  -> maps T-001, T-003, T-019
+- [x] P3-27 (implementation) [high-risk] Go Dockerfiles alpine runtime  -> maps T-001, T-003, T-019
 - [ ] P3-28 (implementation) [high-risk] Node Dockerfiles drop profiler-only toolchain  -> maps T-001, T-004, T-019
 - [ ] P3-29 (implementation) [high-risk] emailservice/adservice Dockerfiles remove dead profiler config  -> maps T-001, T-005, T-019
 - [ ] P3-30 (implementation) [high-risk] root docker-compose.yml with Redis  -> maps T-001, T-015, T-016, T-017, T-018, T-019, T-020, T-021, T-022, T-023, T-024, T-025, T-026
