@@ -4,7 +4,8 @@
 > users browse items, add them to a cart, and purchase them. Services span Go, C#/.NET, Java,
 > Node.js, and Python, communicating over gRPC, and are deployed to Kubernetes.
 >
-> **Current state:** Full application exists and is deployed via Skaffold + Kubernetes manifests;
+> **Current state:** Full application exists and is deployed via Skaffold + Kubernetes manifests,
+> and also runs locally via `docker compose up --build` without any Google service;
 > per-service source lives under `src/`, with a shared gRPC contract in `protos/`. Kept honest by
 > `work-docs` (pipeline Step 5) after every shipped unit.
 
@@ -75,9 +76,11 @@ Multi-service repo — no single build/test command. Per-service commands (also 
 | `src/loadgenerator/` (Python) | `python3 -m compileall -q src/loadgenerator` | — |
 | `src/shoppingassistantservice/` (Python) | `python3 -m compileall -q src/shoppingassistantservice` | — |
 
-**Run (whole app):** `skaffold run` (or `skaffold dev`) against a local/remote Kubernetes cluster
-(minikube / kind / GKE); front end is exposed via the `frontend-external` service. There is no
-lightweight local run — see [docs/test/README.md](docs/test/README.md).
+**Run (whole app):** the lightweight local run is `docker compose up --build` from the repo root —
+11 app services + Redis, front end at http://localhost:8080 (`shoppingassistantservice` is not wired).
+Alternatively, `skaffold run` (or `skaffold dev`) against a local/remote Kubernetes cluster
+(minikube / kind / GKE); front end is exposed via the `frontend-external` service. See
+[docs/test/README.md](docs/test/README.md).
 
 > The `coder` subagent and the quality gate read these. They are the single source of truth for
 > "is this task green?".
@@ -88,6 +91,8 @@ lightweight local run — see [docs/test/README.md](docs/test/README.md).
 - `kubernetes-manifests/`, `kustomize/`, `helm-chart/`, `istio-manifests/` — deployment manifests.
 - `terraform/` — infra provisioning.
 - `skaffold.yaml`, `cloudbuild.yaml` — build/deploy orchestration.
+- `docker-compose.yml` — local run of the whole app with Redis, no Google services.
+- `docs/architecture.md` — system architecture (layers, services, request flows); `docs/shopping-assistant-ollama.md` — not-yet-implemented plan for a local-LLM shopping assistant.
 - `docs/work/` — spec-driven pipeline artifacts (`NNN-<slug>/`).
 - `docs/test/` — e2e runbook + live-smoke evidence.
 - `.claude/` — committed agents, skills, hooks, settings, and `dev-kit.manifest` (the vendored dev-kit

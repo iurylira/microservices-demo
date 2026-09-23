@@ -42,6 +42,69 @@ Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
 | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | [![Screenshot of store homepage](/docs/img/online-boutique-frontend-1.png)](/docs/img/online-boutique-frontend-1.png) | [![Screenshot of checkout screen](/docs/img/online-boutique-frontend-2.png)](/docs/img/online-boutique-frontend-2.png) |
 
+## Run locally with Docker Compose (no Google services)
+
+This fork can run the whole store on one machine with Docker Compose, using no Google Cloud
+services. The [`docker-compose.yml`](/docker-compose.yml) at the repository root builds every
+service from source under [`src/`](/src).
+
+1. Ensure you have the following requirements:
+   - [Docker Desktop](https://docs.docker.com/desktop/), or Docker Engine with Compose v2
+     (`docker compose version` prints v2.x or later).
+   - Enough memory and disk for eleven images. The .NET, Java and Python images are large, so the
+     first build takes a while.
+   - Port `8080` free on the host.
+
+2. Clone the repository, then build and start the stack.
+
+   ```sh
+   git clone https://github.com/<your-fork>/microservices-demo.git
+   cd microservices-demo/
+   docker compose up --build        # add -d to run it in the background
+   ```
+
+3. Open <http://localhost:8080> in a web browser.
+
+4. Follow the logs of a service, or stop the stack.
+
+   ```sh
+   docker compose logs -f frontend  # any service name from the table below
+   docker compose down              # add -v to also remove Redis's leftover anonymous volume
+   ```
+
+The stack runs 11 application services plus Redis. Only the frontend is published on the host.
+
+| Compose service         | Language      | Container port | Role                                                        |
+| ----------------------- | ------------- | -------------- | ----------------------------------------------------------- |
+| `frontend`              | Go            | 8080 (host 8080) | Serves the website over HTTP.                             |
+| `checkoutservice`       | Go            | 5050           | Places orders: payment, shipping and confirmation email.    |
+| `productcatalogservice` | Go            | 3550           | Serves the product list from `products.json`.               |
+| `shippingservice`       | Go            | 50051          | Shipping quotes and mock shipping.                          |
+| `cartservice`           | C#            | 7070           | Stores shopping carts in Redis.                             |
+| `currencyservice`       | Node.js       | 7000           | Converts money between currencies.                          |
+| `paymentservice`        | Node.js       | 50051          | Charges the card (mock).                                    |
+| `emailservice`          | Python        | 8080           | Sends the order confirmation email (mock).                  |
+| `recommendationservice` | Python        | 8080           | Recommends other products.                                  |
+| `adservice`             | Java          | 9555           | Serves text ads.                                            |
+| `loadgenerator`         | Python/Locust | none           | Sends simulated shopper traffic to the frontend.            |
+| `redis`                 | Redis         | 6379           | Cart database (`redis:8.10.2-alpine` image, pinned by digest). |
+
+The `loadgenerator` starts sending traffic once the frontend is healthy. To stop it, run
+`docker compose stop loadgenerator`.
+
+What is different from the GKE deployment:
+
+- No Google Cloud dependencies. The code no longer uses Spanner, AlloyDB, Memorystore, Cloud
+  Profiler or the GCP metadata server. Images are built locally instead of pulled from `gcr.io`,
+  and the frontend uses the system font stack instead of Google Fonts. The cart lives in the
+  bundled Redis container.
+- `shoppingassistantservice` (Gemini + AlloyDB) is not included. To run the assistant with a local
+  Ollama model, see [Shopping assistant with Ollama](/docs/shopping-assistant-ollama.md).
+
+See [Architecture](/docs/architecture.md) for the system design, and the
+[live-smoke runbook](/docs/test/001-no-google-docker-compose/runbook.md) to check a local run
+end to end.
+
 ## Quickstart (GKE)
 
 1. Ensure you have the following requirements:
@@ -132,6 +195,7 @@ Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
 - **Istio / Cloud Service Mesh**: [See these instructions](/kustomize/components/service-mesh-istio/README.md) to deploy Online Boutique alongside an Istio-backed service mesh.
 - **Non-GKE clusters (Minikube, Kind, etc)**: See the [Development guide](/docs/development-guide.md) to learn how you can deploy Online Boutique on non-GKE clusters.
 - **AI assistant using Gemini**: [See these instructions](/kustomize/components/shopping-assistant/README.md) to deploy a Gemini-powered AI assistant that suggests products to purchase based on an image.
+- **Spanner / AlloyDB carts**: not supported in this fork. `cartservice` no longer has Spanner or AlloyDB cart stores, so the `spanner` and `alloydb` Kustomize components no longer take effect. Without `REDIS_ADDR`, the cart falls back to an in-memory store.
 - **And more**: The [`/kustomize` directory](/kustomize) contains instructions for customizing the deployment of Online Boutique with other variations.
 
 ## Documentation
