@@ -1,0 +1,10 @@
+$ docker info (after starting dockerd in background)
+ Server Version: 29.3.1
+ Storage Driver: overlayfs
+ Cgroup Driver: cgroupfs
+ Cgroup Version: 1
+ Kernel Version: 6.18.44-fc-v37
+ Operating System: Ubuntu 24.04.4 LTS
+
+$ docker compose version
+Docker Compose version v5.1.1

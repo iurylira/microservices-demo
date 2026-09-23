@@ -1,0 +1,8 @@
+$ docker compose build productcatalogservice
+#12 [builder 4/6] RUN go mod download
+#12 0.387 go: github.com/cenkalti/backoff/v5@v5.0.3: Get "https://proxy.golang.org/github.com/cenkalti/backoff/v5/@v/v5.0.3.mod": tls: failed to verify certificate: x509: certificate signed by unknown authority
+#12 ERROR: process "/bin/sh -c go mod download" did not complete successfully: exit code: 1
+ > [builder 4/6] RUN go mod download:
+0.387 go: github.com/cenkalti/backoff/v5@v5.0.3: Get "https://proxy.golang.org/github.com/cenkalti/backoff/v5/@v/v5.0.3.mod": tls: failed to verify certificate: x509: certificate signed by unknown authority
+  25 | >>> RUN go mod download
+failed to solve: process "/bin/sh -c go mod download" did not complete successfully: exit code: 1
