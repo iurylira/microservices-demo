@@ -603,7 +603,7 @@ Branch for every commit: `claude/elegant-edison-99ry8y` (never `main`; no merge 
 
 ### Batch B2 — red tests (1 coder dispatch, serial) [expected-red] — first attempts .NET 10 SDK install (Environment note 1)
 - [x] P3-03 (red-tests) [expected-red] productcatalogservice loader specs  -> maps T-011, T-012
-- [ ] P3-04 (red-tests) [expected-red] cartservice Spanner/AlloyDB env selects nothing (unverified-here without SDK)  -> maps T-014
+- [x] P3-04 (red-tests) [expected-red] cartservice Spanner/AlloyDB env selects nothing (unverified-here without SDK)  -> maps T-014
 
 ### Batch B3 — implementation: Go services + cartservice source (1 coder dispatch, serial)
 - [ ] P3-05 (implementation) productcatalogservice always loads products.json  -> maps T-011, T-012, T-009
