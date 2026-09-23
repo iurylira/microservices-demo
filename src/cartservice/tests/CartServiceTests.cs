@@ -157,11 +157,11 @@ namespace cartservice.tests
             Assert.Empty(cart.Items);
         }
 
-        // T-014: Given Spanner/AlloyDB settings and no REDIS_ADDR,
+        // T-014: Given legacy cloud-store settings and no REDIS_ADDR,
         // When an item is added and the cart read back,
         // Then the in-memory store serves it (the cloud store settings select nothing).
         [Fact(Timeout = 30000)]
-        public async Task AddItem_SpannerAndAlloyDBSettingsSet_InMemoryStoreUsed()
+        public async Task AddItem_LegacyCloudStoreSettingsSet_InMemoryStoreUsed()
         {
             // Setup test server with the cloud store settings, and client
             var host = new HostBuilder().ConfigureWebHost(webBuilder =>

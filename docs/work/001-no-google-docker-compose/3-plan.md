@@ -640,7 +640,7 @@ Branch for every commit: `claude/elegant-edison-99ry8y` (never `main`; no merge 
 - [x] P3-30 (implementation) [high-risk] root docker-compose.yml with Redis  -> maps T-001, T-015, T-016, T-017, T-018, T-019, T-020, T-021, T-022, T-023, T-024, T-025, T-026
 
 ### Batch B7 — consolidation (orchestrator-run static sweep, no dispatch; coder only if a check fails)
-- [ ] P3-31 (consolidation) full static sweep, zero Google in SCOPE, final green (commit only if a fix is needed)  -> maps T-001..T-009, T-011, T-012, T-015..T-018
+- [x] P3-31 (consolidation) full static sweep, zero Google in SCOPE, final green (commit only if a fix is needed)  -> maps T-001..T-009, T-011, T-012, T-015..T-018
 
 ### Batch B8 — e2e live smoke (1 e2e-tester dispatch)
 - [ ] P3-32 (e2e) Compose live smoke per runbook -> evidence + summary in docs/test/001-no-google-docker-compose/. No daemon here (expected): commit runbook.md + summary.md (verdict "PENDING — user-local run") as `test(e2e): add user-local compose smoke runbook (verdict PENDING)`, leave this box UNTICKED, and STOP for the user's local PASS before work-docs / PR.

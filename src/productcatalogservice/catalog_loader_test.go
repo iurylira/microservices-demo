@@ -52,9 +52,9 @@ func TestLoadCatalog_Default_LoadsProductsJSON(t *testing.T) {
 	assertLoadsLocalCatalog(t)
 }
 
-// T-012: Given AlloyDB env vars set, When loadCatalog runs, Then it still loads
+// T-012: Given legacy cloud-database env vars set, When loadCatalog runs, Then it still loads
 // products.json with no network/DB attempt.
-func TestLoadCatalog_AlloyDBEnvSet_StillLoadsProductsJSON(t *testing.T) {
+func TestLoadCatalog_LegacyDatabaseEnvSet_StillLoadsProductsJSON(t *testing.T) {
 	t.Setenv("ALLOYDB_CLUSTER_NAME", "dummy-cluster")
 	t.Setenv("PROJECT_ID", "dummy-project")
 	t.Setenv("REGION", "dummy-region")
