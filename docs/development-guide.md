@@ -1,123 +1,56 @@
-# Development Guide 
+# Development Guide
 
-This doc explains how to build and run the Online Boutique source code locally using the `skaffold` command-line tool.  
+This doc explains how to build, test and run the Online Boutique source code locally. The whole app
+runs with Docker Compose; each service can also be built and tested on its own.
 
 ## Prerequisites
 
-- [Docker for Desktop](https://www.docker.com/products/docker-desktop)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/) (can be installed via `gcloud components install kubectl` for Option 1 - GKE)
-- [skaffold **2.0.2+**](https://skaffold.dev/docs/install/) (latest version recommended), a tool that builds and deploys Docker images in bulk. 
+- [Docker Desktop](https://docs.docker.com/desktop/), or Docker Engine with Compose v2
+  (`docker compose version` prints v2.x or later).
 - Clone the repository.
     ```sh
-    git clone https://github.com/GoogleCloudPlatform/microservices-demo
+    git clone https://github.com/<your-fork>/microservices-demo.git
     cd microservices-demo/
     ```
-- A Google Cloud project with Google Container Registry enabled. (for Option 1 - GKE)
-- [Minikube](https://minikube.sigs.k8s.io/docs/start/) (optional for Option 2 - Local Cluster)
-- [Kind](https://kind.sigs.k8s.io/) (optional for Option 2 - Local Cluster)
+- Only for building or testing a single service outside Docker: that service's toolchain (Go,
+  .NET 10 SDK, JDK, Node.js or Python 3).
 
-## Option 1: Google Kubernetes Engine (GKE)
+## Run the whole app (Docker Compose)
 
-> 💡 Recommended if you're using Google Cloud and want to try it on
-> a realistic cluster. **Note**: If your cluster has Workload Identity enabled, 
-> [see these instructions](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity#enable)
-
-1.  Create a Google Kubernetes Engine cluster and make sure `kubectl` is pointing
-    to the cluster.
+1. From the repository root, build and start the stack:
 
     ```sh
-    gcloud services enable container.googleapis.com
+    docker compose up --build        # add -d to run it in the background
     ```
+
+    The first build is slow (eleven images). It starts the 11 application services plus Redis.
+
+2. Navigate to <http://localhost:8080> to access the web frontend. Only the frontend port is
+   published on the host.
+
+3. After changing a service's code, rebuild and restart just that service:
 
     ```sh
-    gcloud container clusters create-auto demo --region=us-central1
+    docker compose up --build -d <service>    # for example: frontend
     ```
 
-    ```
-    kubectl get nodes
-    ```
+4. Follow logs with `docker compose logs -f <service>`.
 
-2.  Enable Artifact Registry (AR) on your GCP project and configure the
-    `docker` CLI to authenticate to AR:
+See the [README quickstart](../README.md#quickstart-docker-compose) for the service list and
+troubleshooting, and the [live-smoke runbook](test/README.md) to check a run end to end.
 
-    ```sh
-    gcloud services enable artifactregistry.googleapis.com
-    ```
+## Build and test one service
 
-    ```sh
-    gcloud artifacts repositories create microservices-demo \
-      --repository-format=docker \
-      --location=us \
-    ```
+Run these from the repository root. They are the same commands the quality gate uses
+([`.claude/quality-gate.routes`](../.claude/quality-gate.routes)).
 
-    ```sh
-    gcloud auth configure-docker -q 
-    ```
-
-3.  In the root of this repository, run:
-
-    ```
-    skaffold run --default-repo=us-docker.pkg.dev/PROJECT_ID/microservices-demo
-    ```
-    
-    Where `PROJECT_ID` is replaced by your Google Cloud project ID.
-
-    This command:
-
-    - Builds the container images.
-    - Pushes them to AR.
-    - Applies the `./kubernetes-manifests` deploying the application to
-      Kubernetes.
-
-    **Troubleshooting:** If you get "No space left on device" error on Google
-    Cloud Shell, you can build the images on Google Cloud Build: [Enable the
-    Cloud Build
-    API](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com),
-    then run `skaffold run -p gcb --default-repo=us-docker.pkg.dev/[PROJECT_ID]/microservices-demo` instead.
-
-4.  Find the IP address of your application, then visit the application on your
-    browser to confirm installation.
-
-        kubectl get service frontend-external
-
-5.  Navigate to `http://EXTERNAL-IP` to access the web frontend.
-
-## Option 2 - Local Cluster 
-
-1. Launch a local Kubernetes cluster with one of the following tools:
-
-    - To launch **Minikube** (tested with Ubuntu Linux). Please, ensure that the
-       local Kubernetes cluster has at least:
-        - 4 CPUs
-        - 4.0 GiB memory
-        - 32 GB disk space
-
-      ```shell
-      minikube start --cpus=4 --memory 4096 --disk-size 32g
-      ```
-
-    - To launch **Docker for Desktop** (tested with Mac/Windows). Go to Preferences:
-        - choose “Enable Kubernetes”,
-        - set CPUs to at least 3, and Memory to at least 6.0 GiB
-        - on the "Disk" tab, set at least 32 GB disk space
-
-    - To launch a **Kind** cluster:
-
-      ```shell
-      kind create cluster
-      ```
-
-2. Run `kubectl get nodes` to verify you're connected to the respective control plane.
-
-3. Run `skaffold run` (first time will be slow, it can take ~20 minutes).
-   This will build and deploy the application. If you need to rebuild the images
-   automatically as you refactor the code, run `skaffold dev` command.
-
-4. Run `kubectl get pods` to verify the Pods are ready and running.
-
-5. Run `kubectl port-forward deployment/frontend 8080:8080` to forward a port to the frontend service.
-
-6. Navigate to `localhost:8080` to access the web frontend.
+| Service | Build | Test |
+| :------ | :---- | :--- |
+| `frontend`, `checkoutservice`, `productcatalogservice`, `shippingservice` (Go) | `cd src/<service> && go build ./...` | `cd src/<service> && go test ./...` |
+| `cartservice` (C#/.NET 10) | `dotnet build src/cartservice/cartservice.sln` | `dotnet test src/cartservice/` |
+| `adservice` (Java/Gradle) | `cd src/adservice && bash gradlew --no-daemon assemble` | no unit tests |
+| `currencyservice`, `paymentservice` (Node.js) | `node --check` on each `*.js` file | no test suite |
+| `emailservice`, `recommendationservice`, `loadgenerator`, `shoppingassistantservice` (Python) | `python3 -m compileall -q src/<service>` | no test suite |
 
 ## Adding a new microservice
 
@@ -127,5 +60,5 @@ See the [Adding a new microservice](adding-new-microservice.md) guide for instru
 
 ## Cleanup
 
-If you've deployed the application with `skaffold run` command, you can run
-`skaffold delete` to clean up the deployed resources.
+Stop the stack with `docker compose down`. Add `-v` to also remove Redis's leftover anonymous
+volume.

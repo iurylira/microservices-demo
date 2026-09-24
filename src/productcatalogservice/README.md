@@ -21,14 +21,13 @@ remove it (if needed) by sending a `USR2` signal:
 
 ```
 # Trigger bug
-kubectl exec \
-    $(kubectl get pods -l app=productcatalogservice -o jsonpath='{.items[0].metadata.name}') \
-    -c server -- kill -USR1 1
+docker compose kill -s USR1 productcatalogservice
 # Remove bug
-kubectl exec \
-    $(kubectl get pods -l app=productcatalogservice -o jsonpath='{.items[0].metadata.name}') \
-    -c server -- kill -USR2 1
+docker compose kill -s USR2 productcatalogservice
 ```
+
+The server is the container's main process (exec-form `ENTRYPOINT`), so it receives the signal
+directly; the container keeps running.
 
 ## Latency injection
 
@@ -36,3 +35,5 @@ This service has an `EXTRA_LATENCY` environment variable. This will inject a sle
 to the server.
 
 For example, use `EXTRA_LATENCY="5.5s"` to sleep for 5.5 seconds on every request.
+With Docker Compose, add it under `productcatalogservice.environment` in the root
+`docker-compose.yml` and restart the service (`docker compose up -d productcatalogservice`).

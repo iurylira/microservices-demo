@@ -15,13 +15,4 @@
   constraints: {
     python: '3.14.6',
   },
-  kubernetes: {
-    managerFilePatterns: [
-      '/\\.yaml$/',
-    ],
-    ignorePaths: [
-      'release/**',
-      'kustomize/base/**',
-    ],
-  },
 }

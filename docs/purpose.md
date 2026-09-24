@@ -2,12 +2,11 @@
 
 Today, the primary purpose of Online Boutique is to demonstrate:
 
-* [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine)
-* [Anthos](https://cloud.google.com/anthos)
-* [Google Cloud Operations](https://cloud.google.com/products/operations)
-* tools and technologies commonly used alongside the above products
+* a polyglot microservices application (Go, C#, Java, Node.js and Python) talking over gRPC
+* running the whole application locally with Docker Compose, with no cloud services
+* tools and technologies commonly used alongside the above
 
-while being accessible and useful to all new Kubernetes users.
+while being accessible and useful to developers who are new to microservices.
 
 ### Why does the purpose matter?
 

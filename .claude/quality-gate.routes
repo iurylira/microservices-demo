@@ -5,7 +5,7 @@
 # NOTE: each command must START WITH a real executable (the gate pre-checks the first
 # word as a toolchain). Commands that need to `cd` into a service dir are therefore
 # wrapped in `sh -c '...'` — do not start a route command with `(`.
-# Unrouted changes (docs/, kubernetes-manifests/, terraform/, helm-chart/, kustomize/)
+# Unrouted changes (docs/, docker-compose.yml, .github/)
 # match no route and are left to each task's own acceptance check.
 
 # --- Go services (go build + go test) — .github/workflows/ci-pr.yaml "Go Unit Tests" ---

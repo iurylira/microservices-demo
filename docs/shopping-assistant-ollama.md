@@ -84,17 +84,15 @@ runs three steps per request:
 Other Google dependencies:
 
 - **Secret Manager** holds the AlloyDB password (`secretmanager_v1`, `ALLOYDB_SECRET_NAME`).
-- **Required env vars:** `PROJECT_ID`, `REGION`, `ALLOYDB_*` and `GOOGLE_API_KEY`
-  ([kustomize manifest](../kustomize/components/shopping-assistant/shoppingassistantservice.yaml)).
+- **Required env vars:** `PROJECT_ID`, `REGION`, `ALLOYDB_*` and `GOOGLE_API_KEY` (set by the
+  upstream deploy manifest, removed from this repo; last present at commit `9b5c94a`).
 - **[`requirements.in`](../src/shoppingassistantservice/requirements.in):**
   `langchain-google-genai`, `langchain-google-alloydb-pg`, `google-cloud-secret-manager`.
-- **How the vector table is filled.** Two scripts do it:
-  [`2_create_populate_alloydb_tables.sh`](../kustomize/components/shopping-assistant/scripts/2_create_populate_alloydb_tables.sh)
-  and
-  [`generate_sql_from_products.py`](../kustomize/components/shopping-assistant/scripts/generate_sql_from_products.py).
-  They create `products.catalog_items (id, name, description, picture, price_usd_*, categories,
-  product_embedding VECTOR(768), embed_model)`, insert one row for each product in
-  `products.json`, and then compute the embeddings **inside AlloyDB** with
+- **How the vector table was filled.** Two upstream seeding scripts (a shell script and a Python
+  SQL generator, removed from this repo with the deploy assets; last present at commit `9b5c94a`)
+  created `products.catalog_items (id, name, description, picture, price_usd_*, categories,
+  product_embedding VECTOR(768), embed_model)`, inserted one row for each product in
+  `products.json`, and then computed the embeddings **inside AlloyDB** with
   `embedding('textembedding-gecko@003', description)`.
 
   > Side note: the rows are embedded with `textembedding-gecko@003`, but queries are embedded
@@ -123,7 +121,7 @@ flowchart LR
 | `AlloyDBEngine` / `AlloyDBVectorStore` | `PGEngine` / `PGVectorStore` (`langchain-postgres`) on `pgvector/pgvector` |
 | Secret Manager password | `DATABASE_URL` env var (local only) |
 | AlloyDB `embedding()` SQL plus shell scripts | a Python seed script that embeds `products.json` with the same `EMBEDDING_MODEL` |
-| GKE / kustomize only | new services in the root `docker-compose.yml` |
+| No local runtime (upstream cloud-only deploy) | new services in the root `docker-compose.yml` |
 
 The HTTP contract in [section 1.1](#11-the-http-contract-keep-this-unchanged) and the three-step
 prompt flow **stay the same**.
@@ -547,14 +545,6 @@ ENABLE_ASSISTANT: "true"
 Remove the comment that says the assistant is not deployed, and the header comment at the top of
 the file that says the same.
 
-### Step 7 — Kubernetes (optional, later)
-
-This guide targets Compose. To do the same on Kubernetes, add a kustomize component (like
-[`kustomize/components/shopping-assistant`](../kustomize/components/shopping-assistant/)) with an
-`ollama` Deployment plus a PVC for `/root/.ollama` (and a GPU node selector if you want one), a
-`pgvector` StatefulSet, a seed `Job`, and the same env vars. It is out of scope for the first
-unit (YAGNI).
-
 ---
 
 ## 4. Hardware, model sizing and performance
@@ -704,10 +694,9 @@ Trade-offs:
   ([`docs/work/001-no-google-docker-compose/2-tests.md`](work/001-no-google-docker-compose/2-tests.md),
   `GOOGLE_PATTERN`) currently skips this directory with `--exclude-dir=shoppingassistantservice`.
   The follow-up unit can drop that exclusion and run the grep over the whole of `src/`.
-- **The Gemini deployment path.** The GKE path
-  ([`kustomize/components/shopping-assistant`](../kustomize/components/shopping-assistant/README.md),
-  its scripts and `kubernetes-manifests/`) would stop matching the code. The unit's research step
-  must decide whether to update it, remove it, or keep the Gemini code behind a switch.
+- **The Gemini code path.** The upstream cloud deploy assets for the Gemini version were removed
+  from this repo, so nothing deploys it any more. The unit's research step must decide whether to
+  drop the Gemini code or keep it behind a switch.
 - **Run it through dev-kit.** research (decide on the Compose profile, the default models, and
   the missing-image behaviour) → tests (Given-When-Then for the HTTP contract, the seed, and the
   text-only path) → plan → execute (the `coder` writes the code; `e2e-tester` runs
@@ -724,7 +713,7 @@ Trade-offs:
 Repository files read for this guide:
 `src/shoppingassistantservice/{shoppingassistantservice.py,requirements.in,requirements.txt,Dockerfile}`,
 `src/frontend/{main.go,handlers.go,templates/assistant.html,templates/header.html}`,
-`docker-compose.yml`, `kustomize/components/shopping-assistant/{shoppingassistantservice.yaml,README.md,scripts/*}`,
+`docker-compose.yml`, the upstream shopping-assistant deploy manifest and seeding scripts (removed; see commit `9b5c94a`),
 `src/productcatalogservice/products.json`, `docs/work/001-no-google-docker-compose/2-tests.md`.
 
 External sources (fetched 2026-09-23 unless marked):

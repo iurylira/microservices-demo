@@ -20,9 +20,8 @@ What this fork changes compared with upstream:
 - **The shopping assistant is not wired.** `src/shoppingassistantservice` (Gemini + AlloyDB) is
   not part of the Compose stack. The frontend still needs `SHOPPING_ASSISTANT_SERVICE_ADDR` at
   startup, so Compose sets a placeholder value.
-
-The Kubernetes path (`skaffold run`, `kubernetes-manifests/`, `kustomize/`, `helm-chart/`) still
-exists as an alternative way to deploy.
+- **Docker Compose is the only runtime.** The upstream cloud-deploy assets (cluster manifests,
+  infrastructure provisioning, release tooling) were removed.
 
 ## 2. Layered view
 
@@ -57,7 +56,7 @@ flowchart TB
     end
 
     subgraph L5["Runtime / infrastructure layer"]
-        DC["Docker Compose: one default network, service-name DNS<br/>alternative: Kubernetes via Skaffold / Helm / Kustomize"]
+        DC["Docker Compose: one default network, service-name DNS"]
     end
 
     B -- "HTTP :8080" --> FE
@@ -325,7 +324,7 @@ process and are lost on restart. Compose always sets `REDIS_ADDR=redis:6379`.
 
 ### 6.5 Runtime layer
 
-**Docker Compose (default in this fork).**
+**Docker Compose (the only runtime in this fork).**
 
 - Each app service is built from its own directory (`build.context: ./src/<service>`; for
   cartservice it is `./src/cartservice/src`). Redis uses a pinned `redis:8.10.2-alpine` image.
@@ -336,13 +335,6 @@ process and are lost on restart. Compose always sets `REDIS_ADDR=redis:6379`.
 - Start order (`depends_on`): cartservice waits for Redis to be healthy; loadgenerator waits for
   frontend to be healthy; frontend, checkoutservice and recommendationservice wait for their
   backends to be started (not healthy).
-
-**Kubernetes (alternative).** `skaffold run` builds the images and applies
-[`kubernetes-manifests/`](../kubernetes-manifests) (one Deployment and Service per app, plus a
-`redis-cart` Deployment for carts). [`kustomize/`](../kustomize) adds optional components, and
-[`helm-chart/`](../helm-chart) is a Helm package of the same app. Some kustomize components still
-target Google Cloud (for example `alloydb`, `spanner`, `memorystore`) and were not changed for
-this fork.
 
 ### 6.6 Configuration
 
