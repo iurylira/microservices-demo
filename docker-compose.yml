@@ -1,7 +1,7 @@
 # Online Boutique on Docker Compose, with no Google Cloud services.
 # Every app service is built from source under src/; Redis is the cart store.
 # Run: docker compose up --build   ->   http://localhost:8080
-# shoppingassistantservice is intentionally not wired (it depends on Google AI services).
+# The shopping assistant runs locally with Ollama and needs no Google credentials.
 
 services:
   frontend:
@@ -18,8 +18,8 @@ services:
       SHIPPING_SERVICE_ADDR: "shippingservice:50051"
       CHECKOUT_SERVICE_ADDR: "checkoutservice:5050"
       AD_SERVICE_ADDR: "adservice:9555"
-      # Required by the frontend at startup; the assistant is not deployed, so this is a placeholder.
-      SHOPPING_ASSISTANT_SERVICE_ADDR: "shoppingassistantservice:80"
+      SHOPPING_ASSISTANT_SERVICE_ADDR: "shoppingassistantservice:8080"
+      ENABLE_ASSISTANT: "true"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8080/_healthz"]
       interval: 5s
@@ -33,6 +33,42 @@ services:
       - shippingservice
       - checkoutservice
       - adservice
+      - shoppingassistantservice
+
+  shoppingassistantservice:
+    build:
+      context: ./src/shoppingassistantservice
+    environment:
+      OLLAMA_BASE_URL: "http://ollama:11434"
+      LLM_MODEL: "${LLM_MODEL:-llama3.2:1b}"
+      VISION_MODEL: "${VISION_MODEL:-none}"
+      PRODUCTS_JSON: "/data/products.json"
+    volumes:
+      - ./src/productcatalogservice/products.json:/data/products.json:ro
+    depends_on:
+      ollama-pull:
+        condition: service_completed_successfully
+
+  ollama:
+    image: ollama/ollama:0.12.6
+    volumes:
+      - ollama-models:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  ollama-pull:
+    image: ollama/ollama:0.12.6
+    environment:
+      OLLAMA_HOST: "ollama:11434"
+      LLM_MODEL: "${LLM_MODEL:-llama3.2:1b}"
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["ollama pull $${LLM_MODEL:-llama3.2:1b}"]
+    depends_on:
+      ollama:
+        condition: service_healthy
 
   checkoutservice:
     build:
@@ -125,3 +161,6 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+volumes:
+  ollama-models:
