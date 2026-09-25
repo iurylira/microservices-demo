@@ -60,6 +60,20 @@ def create_app():
     def talk_to_ollama():
         body = request.get_json(force=True)
         prompt = unquote(body["message"])
+        normalized_prompt = prompt.lower().strip()
+        if "what can you" in normalized_prompt or normalized_prompt in {
+            "help",
+            "help me",
+            "what do you do",
+        }:
+            return {
+                "content": (
+                    "I can recommend products from the Online Boutique catalog, "
+                    "help you compare items, and suggest products based on a room "
+                    "image when image analysis is enabled."
+                )
+            }
+
         room_description = describe_room(body.get("image"))
         catalog = "\n".join(
             f"ID: {product['id']} | {product['name']} | {product.get('description', '')}"
@@ -67,10 +81,12 @@ def create_app():
         )
         design_prompt = (
             "You are the shopping assistant for Online Boutique. Recommend only products "
-            "from the catalog below. Answer naturally and end with up to three real product "
-            "IDs in brackets, such as [OLJCESPC7Z]. Do not invent IDs.\n\n"
+            "from the catalog below when the customer asks for recommendations. If the "
+            "customer did not ask for products, answer the question directly and do not "
+            "include product IDs. Recommend one product by default and up to three only "
+            "when the customer asks for options. Never invent IDs.\n\n"
             f"Customer request: {prompt}\n"
-            f"Room style: {room_description or 'No image was provided.'}\n\n"
+            f"Room style: {room_description or 'No room image was provided; do not infer one.'}\n\n"
             f"Catalog:\n{catalog}"
         )
         response = llm.invoke(design_prompt)
