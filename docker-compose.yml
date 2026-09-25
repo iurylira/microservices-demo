@@ -1,0 +1,167 @@
+# Online Boutique on Docker Compose, with no Google Cloud services.
+# Every app service is built from source under src/; Redis is the cart store.
+# Run: docker compose up --build   ->   http://localhost:8080
+# The shopping assistant runs locally with Ollama and needs no Google credentials.
+
+services:
+  frontend:
+    build:
+      context: ./src/frontend
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: "8080"
+      PRODUCT_CATALOG_SERVICE_ADDR: "productcatalogservice:3550"
+      CURRENCY_SERVICE_ADDR: "currencyservice:7000"
+      CART_SERVICE_ADDR: "cartservice:7070"
+      RECOMMENDATION_SERVICE_ADDR: "recommendationservice:8080"
+      SHIPPING_SERVICE_ADDR: "shippingservice:50051"
+      CHECKOUT_SERVICE_ADDR: "checkoutservice:5050"
+      AD_SERVICE_ADDR: "adservice:9555"
+      SHOPPING_ASSISTANT_SERVICE_ADDR: "shoppingassistantservice:8080"
+      ENABLE_ASSISTANT: "true"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/_healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    depends_on:
+      - productcatalogservice
+      - currencyservice
+      - cartservice
+      - recommendationservice
+      - shippingservice
+      - checkoutservice
+      - adservice
+      - shoppingassistantservice
+
+  shoppingassistantservice:
+    build:
+      context: ./src/shoppingassistantservice
+    environment:
+      OLLAMA_BASE_URL: "http://ollama:11434"
+      LLM_MODEL: "${LLM_MODEL:-llama3.2:1b}"
+      VISION_MODEL: "${VISION_MODEL:-llava:7b}"
+      PRODUCTS_JSON: "/data/products.json"
+    volumes:
+      - ./src/productcatalogservice/products.json:/data/products.json:ro
+    depends_on:
+      ollama-pull:
+        condition: service_completed_successfully
+
+  ollama:
+    image: ollama/ollama:0.12.6
+    volumes:
+      - ollama-models:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  ollama-pull:
+    image: ollama/ollama:0.12.6
+    environment:
+      OLLAMA_HOST: "ollama:11434"
+      LLM_MODEL: "${LLM_MODEL:-llama3.2:1b}"
+      VISION_MODEL: "${VISION_MODEL:-llava:7b}"
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["ollama pull $${LLM_MODEL:-llama3.2:1b} && ollama pull $${VISION_MODEL:-llava:7b}"]
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+  checkoutservice:
+    build:
+      context: ./src/checkoutservice
+    environment:
+      PORT: "5050"
+      PRODUCT_CATALOG_SERVICE_ADDR: "productcatalogservice:3550"
+      SHIPPING_SERVICE_ADDR: "shippingservice:50051"
+      PAYMENT_SERVICE_ADDR: "paymentservice:50051"
+      EMAIL_SERVICE_ADDR: "emailservice:8080"
+      CURRENCY_SERVICE_ADDR: "currencyservice:7000"
+      CART_SERVICE_ADDR: "cartservice:7070"
+    depends_on:
+      - productcatalogservice
+      - shippingservice
+      - paymentservice
+      - emailservice
+      - currencyservice
+      - cartservice
+
+  productcatalogservice:
+    build:
+      context: ./src/productcatalogservice
+    environment:
+      PORT: "3550"
+
+  shippingservice:
+    build:
+      context: ./src/shippingservice
+    environment:
+      PORT: "50051"
+
+  cartservice:
+    build:
+      context: ./src/cartservice/src
+    environment:
+      REDIS_ADDR: "redis:6379"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  currencyservice:
+    build:
+      context: ./src/currencyservice
+    environment:
+      PORT: "7000"
+
+  paymentservice:
+    build:
+      context: ./src/paymentservice
+    environment:
+      PORT: "50051"
+
+  emailservice:
+    build:
+      context: ./src/emailservice
+    environment:
+      PORT: "8080"
+
+  recommendationservice:
+    build:
+      context: ./src/recommendationservice
+    environment:
+      PORT: "8080"
+      PRODUCT_CATALOG_SERVICE_ADDR: "productcatalogservice:3550"
+    depends_on:
+      - productcatalogservice
+
+  adservice:
+    build:
+      context: ./src/adservice
+    environment:
+      PORT: "9555"
+
+  loadgenerator:
+    build:
+      context: ./src/loadgenerator
+    environment:
+      FRONTEND_ADDR: "frontend:8080"
+      USERS: "10"
+      RATE: "1"
+    depends_on:
+      frontend:
+        condition: service_healthy
+
+  redis:
+    image: redis:8.10.2-alpine@sha256:72cedd9603038893af961e90ac5e1a1a0d8377d5e338dbdad8fe284ea25de18f
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  ollama-models:

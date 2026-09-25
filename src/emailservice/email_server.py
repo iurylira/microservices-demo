@@ -22,8 +22,6 @@ import time
 import grpc
 import traceback
 from jinja2 import Environment, FileSystemLoader, select_autoescape, TemplateError
-from google.api_core.exceptions import GoogleAPICallError
-from google.auth.exceptions import DefaultCredentialsError
 
 import demo_pb2
 import demo_pb2_grpc
@@ -35,9 +33,6 @@ from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-
-# @TODO: Temporarily removed in https://github.com/GoogleCloudPlatform/microservices-demo/pull/3196
-# import googlecloudprofiler
 
 from logger import getJSONLogger
 logger = getJSONLogger('emailservice-server')
@@ -97,9 +92,9 @@ class EmailService(BaseEmailService):
 
     try:
       EmailService.send_email(self.client, email, confirmation)
-    except GoogleAPICallError as err:
+    except Exception as err:
       context.set_details("An error occurred when sending the email.")
-      print(err.message)
+      print(err)
       context.set_code(grpc.StatusCode.INTERNAL)
       return demo_pb2.Empty()
 
@@ -136,45 +131,8 @@ def start(dummy_mode):
   except KeyboardInterrupt:
     server.stop(0)
 
-def initStackdriverProfiling():
-  project_id = None
-  try:
-    project_id = os.environ["GCP_PROJECT_ID"]
-  except KeyError:
-    # Environment variable not set
-    pass
-
-  # @TODO: Temporarily removed in https://github.com/GoogleCloudPlatform/microservices-demo/pull/3196
-  # for retry in range(1,4):
-  #   try:
-  #     if project_id:
-  #       googlecloudprofiler.start(service='email_server', service_version='1.0.0', verbose=0, project_id=project_id)
-  #     else:
-  #       googlecloudprofiler.start(service='email_server', service_version='1.0.0', verbose=0)
-  #     logger.info("Successfully started Stackdriver Profiler.")
-  #     return
-  #   except (BaseException) as exc:
-  #     logger.info("Unable to start Stackdriver Profiler Python agent. " + str(exc))
-  #     if (retry < 4):
-  #       logger.info("Sleeping %d to retry initializing Stackdriver Profiler"%(retry*10))
-  #       time.sleep (1)
-  #     else:
-  #       logger.warning("Could not initialize Stackdriver Profiler after retrying, giving up")
-  return
-
-
 if __name__ == '__main__':
   logger.info('starting the email service in dummy mode.')
-
-  # Profiler
-  try:
-    if "DISABLE_PROFILER" in os.environ:
-      raise KeyError()
-    else:
-      logger.info("Profiler enabled.")
-      initStackdriverProfiling()
-  except KeyError:
-      logger.info("Profiler disabled.")
 
   # Tracing
   try:
@@ -192,7 +150,7 @@ if __name__ == '__main__':
     grpc_server_instrumentor = GrpcInstrumentorServer()
     grpc_server_instrumentor.instrument()
 
-  except (KeyError, DefaultCredentialsError):
+  except KeyError:
       logger.info("Tracing disabled.")
   except Exception as e:
       logger.warn(f"Exception on Cloud Trace setup: {traceback.format_exc()}, tracing disabled.") 

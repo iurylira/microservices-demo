@@ -42,6 +42,5 @@ sourceFileExtensions:
   - 'proto'
   - 'py'
   - 'sh'
-  - 'tf'
   - 'yaml'
   - 'yml'

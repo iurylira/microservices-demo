@@ -24,7 +24,7 @@ assignees: ''
 
 ### Environment 
 <!--  - OS: [e.g. MacOS Big Sur v11.6] -->
-<!--  - Kubernetes distribution, version: [e.g. minikube, GKE (Standard or Autopilot), EKS, AWS ... ] -->
+<!--  - Docker / Docker Compose version: [e.g. Docker Engine 27.x, Compose v2.29] -->
 <!--  - Any relevant tool version: [e.g. Docker v20.10.8] -->
 
 ### Additional context 

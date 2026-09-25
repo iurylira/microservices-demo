@@ -24,8 +24,8 @@ RUN apt-get -qq update \
     && rm -rf /var/lib/apt/lists/*
 
 # get packages
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+COPY requirements.in .
+RUN pip install -r requirements.in
 
 FROM base
 # Enable unbuffered logging

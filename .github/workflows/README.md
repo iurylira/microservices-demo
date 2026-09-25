@@ -1,51 +1,26 @@
 # GitHub Actions Workflows
 
-This page describes the CI/CD workflows for the Online Boutique app, which run in [Github Actions](https://github.com/GoogleCloudPlatform/microservices-demo/actions).
+This page describes the CI workflows for the Online Boutique app, which run in GitHub Actions.
 
 ## Infrastructure
 
-The CI/CD pipelines for Online Boutique run on standard GitHub-hosted runners (Ubuntu). 
-
-We also host a test GKE cluster, which is where the deploy tests run. Every PR has its own namespace in the cluster.
+The CI pipelines run on standard GitHub-hosted runners (Ubuntu). They need no cloud project,
+cluster or secrets: they only build and unit-test the service code.
 
 ## Workflows
 
-**Note**: In order for the current CI/CD setup to work on your pull request, you must branch directly off the repo (no forks). This is because the Github secrets necessary for these tests aren't copied over when you fork.
+### Code Tests (pull requests) - [ci-pr.yaml](ci-pr.yaml)
 
-### Code Tests - [ci-pr.yaml](ci-pr.yaml)
+Runs on every commit of every open pull request targeting `main` (changes that touch only
+Markdown, `docs/` or `LICENSE` are skipped). The `code-tests` job runs:
 
-These tests run on every commit for every open PR, as well as any commit to main / any release branch. Currently, this workflow runs only Go unit tests.
+1. Go unit tests for `shippingservice`, `productcatalogservice` and `frontend/validator`.
+2. C# unit tests for `cartservice` (`dotnet test src/cartservice/`).
 
+### Code Tests (main / release) - [ci-main.yaml](ci-main.yaml)
 
-### Deploy Tests- [ci-pr.yaml](ci-pr.yaml)
+Runs the same `code-tests` job on every push to `main` or a `release/*` branch (Go unit tests for
+`shippingservice` and `productcatalogservice`, and the `cartservice` C# unit tests).
 
-These tests run on every commit for every open PR, as well as any commit to main / any release branch. This workflow:
-
-1. Creates a dedicated GKE namespace for that PR, if it doesn't already exist, in the PR GKE cluster.
-2. Uses `skaffold run` to build and push the images specific to that PR commit. Then skaffold deploys those images, via `kubernetes-manifests`, to the PR namespace in the test cluster.
-3. Tests to make sure all the pods start up and become ready.
-4. Gets the LoadBalancer IP for the frontend service.
-5. Comments that IP in the pull request, for staging.
-
-### Push and Deploy Latest - [push-deploy](push-deploy.yml)
-
-This is the Continuous Deployment workflow, and it runs on every commit to the main branch. This workflow:
-
-1. Builds the container images for every service, tagging as `latest`.
-2. Pushes those images to Google Container Registry.
-
-Note that this workflow does not update the image tags used in `release/kubernetes-manifests.yaml` - these release manifests are tied to a stable `v0.x.x` release.
-
-### Cleanup - [cleanup.yaml](cleanup.yaml)
-
-This workflow runs when a PR closes, regardless of whether it was merged into main. This workflow deletes the PR-specific GKE namespace in the test cluster.
-
-### Manual Release Builder - [make-release.yaml](make-release.yaml)
-
-This workflow is manually triggered via the `workflow_dispatch` event to automate the release process. When run, it:
-1. Validates the release version format.
-2. Automates the build and push of container images to Google Cloud Build.
-3. Automatically regenerates Kubernetes manifests and Kustomize bases.
-4. Packages and pushes the Helm chart.
-5. Branches and tags the repository.
-6. Opens a new Pull Request targeting `main` with the release checklist.
+To run the whole app end to end, use Docker Compose locally (`docker compose up --build`); see the
+[live-smoke runbook](../../docs/test/README.md).

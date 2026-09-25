@@ -23,36 +23,22 @@ Create a `Dockerfile` in your microservice's directory. This file will define th
 
 Refer to this example and tweak based on your new service's needs: https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/src/frontend/Dockerfile
 
-## 4. Create Kubernetes manifests
+## 4. Add the service to `docker-compose.yml`
 
-Create a new directory under `kustomize/components/` in the root of the repository for your microservice. Inside this directory, add the necessary Kubernetes YAML files for your new microservice. This typically includes:
+Add a service entry for your microservice to the root [`docker-compose.yml`](../docker-compose.yml)
+so it is built and started with the rest of the app. Follow the existing entries:
 
-- A **Deployment** to manage your service's pods.
-- A **Service** to expose your microservice to other services within the cluster.
+- `build.context: ./src/<your-service>` so Compose builds the image from your `Dockerfile`.
+- `environment:` with the `PORT` it listens on and the `*_SERVICE_ADDR` of any service it calls
+  (services reach each other by Compose service name, for example `productcatalogservice:3550`).
+- `depends_on:` for the services it needs at startup.
+- If an existing service calls your new one, add its address (for example
+  `MY_SERVICE_ADDR: "myservice:8080"`) to that service's `environment:`.
 
-Ensure you follow the existing naming conventions and that the container image specified in the Deployment matches the one built by your `cloudbuild.yaml` and `skaffold.yaml` files.
+Check the file with `docker compose config --quiet`, then run `docker compose up --build` and
+verify the new service starts (`docker compose ps`, `docker compose logs <your-service>`).
 
-Refer to this example and tweak based on your new service's needs: https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/kustomize/components/shopping-assistant
-
-## 5. Update the root `kustomization.yaml` file
-
-Add your newly created component to the root kustomization file so it gets picked up by the deployment cycle.
-
-The file is available here: https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/kustomize/kustomization.yaml
-
-## 6. Update the root `skaffold.yaml`
-
-Add your newly created service to the root skaffold file so the images build correctly.
-
-The file is available here: https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/skaffold.yaml
-
-## 7. Update the Helm chart
-
-Add your newly created service to the Helm chart templates and default values.
-
-The chart is available here: https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/helm-chart
-
-## 8. Update the documentation
+## 5. Update the documentation
 
 Finally, update the project's documentation to reflect the addition of your new microservice. This may include:
 

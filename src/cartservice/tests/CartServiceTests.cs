@@ -156,5 +156,53 @@ namespace cartservice.tests
             cart = await client.GetCartAsync(getCartRequest);
             Assert.Empty(cart.Items);
         }
+
+        // T-014: Given legacy cloud-store settings and no REDIS_ADDR,
+        // When an item is added and the cart read back,
+        // Then the in-memory store serves it (the cloud store settings select nothing).
+        [Fact(Timeout = 30000)]
+        public async Task AddItem_LegacyCloudStoreSettingsSet_InMemoryStoreUsed()
+        {
+            // Setup test server with the cloud store settings, and client
+            var host = new HostBuilder().ConfigureWebHost(webBuilder =>
+            {
+                webBuilder
+                    .UseSetting("SPANNER_PROJECT", "dummy-project")
+                    .UseSetting("SPANNER_CONNECTION_STRING", "dummy-connection-string")
+                    .UseSetting("ALLOYDB_PRIMARY_IP", "10.0.0.1")
+                    .UseStartup<Startup>()
+                    .UseTestServer();
+            });
+            using var server = await host.StartAsync();
+            var httpClient = server.GetTestClient();
+
+            string userId = Guid.NewGuid().ToString();
+
+            var channel = GrpcChannel.ForAddress(httpClient.BaseAddress, new GrpcChannelOptions
+            {
+                HttpClient = httpClient
+            });
+
+            var client = new CartServiceClient(channel);
+
+            var request = new AddItemRequest
+            {
+                UserId = userId,
+                Item = new CartItem
+                {
+                    ProductId = "1",
+                    Quantity = 1
+                }
+            };
+
+            // Short deadlines so a hang on a cloud store branch fails fast
+            await client.AddItemAsync(request, deadline: DateTime.UtcNow.AddSeconds(10));
+
+            var cart = await client.GetCartAsync(new GetCartRequest { UserId = userId },
+                deadline: DateTime.UtcNow.AddSeconds(10));
+            Assert.NotNull(cart);
+            Assert.Equal(userId, cart.UserId);
+            Assert.Single(cart.Items);
+        }
     }
 }

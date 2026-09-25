@@ -2,10 +2,12 @@
 
 > A cloud-native microservices demo: an 11-tier web e-commerce ("Online Boutique") app where
 > users browse items, add them to a cart, and purchase them. Services span Go, C#/.NET, Java,
-> Node.js, and Python, communicating over gRPC, and are deployed to Kubernetes.
+> Node.js, and Python, communicating over gRPC, and run locally with Docker Compose.
 >
-> **Current state:** Full application exists and is deployed via Skaffold + Kubernetes manifests;
-> per-service source lives under `src/`, with a shared gRPC contract in `protos/`. Kept honest by
+> **Current state:** Full application exists and runs locally via `docker compose up --build`
+> without any Google or cloud service (Docker Compose is the only supported runtime; the former
+> Kubernetes/cloud-deploy assets were removed); per-service source lives under `src/`, with a
+> shared gRPC contract in `protos/`. Kept honest by
 > `work-docs` (pipeline Step 5) after every shipped unit.
 
 **Think Before Coding** — Don't assume. Don't hide confusion. Surface tradeoffs.
@@ -75,9 +77,9 @@ Multi-service repo — no single build/test command. Per-service commands (also 
 | `src/loadgenerator/` (Python) | `python3 -m compileall -q src/loadgenerator` | — |
 | `src/shoppingassistantservice/` (Python) | `python3 -m compileall -q src/shoppingassistantservice` | — |
 
-**Run (whole app):** `skaffold run` (or `skaffold dev`) against a local/remote Kubernetes cluster
-(minikube / kind / GKE); front end is exposed via the `frontend-external` service. There is no
-lightweight local run — see [docs/test/README.md](docs/test/README.md).
+**Run (whole app):** the lightweight local run is `docker compose up --build` from the repo root —
+11 app services + Redis, front end at http://localhost:8080 (`shoppingassistantservice` is not wired).
+See [docs/test/README.md](docs/test/README.md).
 
 > The `coder` subagent and the quality gate read these. They are the single source of truth for
 > "is this task green?".
@@ -85,9 +87,9 @@ lightweight local run — see [docs/test/README.md](docs/test/README.md).
 ## Structure
 - `src/<service>/` — the 12 microservices (Go, C#, Java, Node, Python), one dir each.
 - `protos/` — shared gRPC contract (`demo.proto`) consumed by all services.
-- `kubernetes-manifests/`, `kustomize/`, `helm-chart/`, `istio-manifests/` — deployment manifests.
-- `terraform/` — infra provisioning.
-- `skaffold.yaml`, `cloudbuild.yaml` — build/deploy orchestration.
+- `docker-compose.yml` — local run of the whole app with Redis, no Google services (the only runtime).
+- `.github/workflows/` — CI: Go + C# unit tests only (no deploy jobs).
+- `docs/architecture.md` — system architecture (layers, services, request flows); `docs/shopping-assistant-ollama.md` — not-yet-implemented plan for a local-LLM shopping assistant.
 - `docs/work/` — spec-driven pipeline artifacts (`NNN-<slug>/`).
 - `docs/test/` — e2e runbook + live-smoke evidence.
 - `.claude/` — committed agents, skills, hooks, settings, and `dev-kit.manifest` (the vendored dev-kit

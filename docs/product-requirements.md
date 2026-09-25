@@ -2,23 +2,21 @@
 
 This document contains a list of requirements that every change made to this repository should meet.
 Every change must:
-1. Preserve the golden user journey taken by Kubernetes beginners.
+1. Preserve the golden user journey of running the app locally.
 1. Preserve the simplicity of demos.
-1. Preserve the simplicity of the GKE quickstart.
+1. Preserve the simplicity of the Docker Compose quickstart.
 
-These requirements are about the default deployment (default configuration) of Online Boutique.
+These requirements are about the default configuration of Online Boutique.
 Changes that will violate any of these rules should not be built into the default configuration of Online Boutique.
-Such changes should be opt-in only — ideally, as a [Kustomize Component](https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/kustomize) if they align with the [purpose of Online Boutique](/docs/purpose.md).
+Such changes should be opt-in only (off by default), and only if they align with the [purpose of Online Boutique](/docs/purpose.md).
 
-### 1. Preserve the golden user journey taken by Kubernetes beginners
+### 1. Preserve the golden user journey of running the app locally
 
 The following statement about Online Boutique should always be true:
 
-> A user outside of Google can deploy Online Boutique's default configuration on a [_kind_ Kubernetes cluster](https://kind.sigs.k8s.io/).
+> A user can run Online Boutique's default configuration on their own machine with `docker compose up --build`, without any cloud account or cloud service.
 
-This statement describes the golden user journey that we expect new Kubernetes users to take while onboarding to Online Boutique.
-
-Being able to run Online Boutique on a _kind_ cluster ensures that Online Boutique is free and cloud-agnostic. This is aligned with [Google's mission](https://about.google/) of making information universally accessible and useful. To be specific, Online Boutique should be useful and accessible to developers that are new to Kubernetes.
+Being able to run Online Boutique with Docker alone ensures that Online Boutique is free and cloud-agnostic, and useful to developers who are new to microservices.
 
 ### 2. Preserve the simplicity of demos
 
@@ -30,10 +28,10 @@ Today, the primary user journey is as follows:
 3. The checkout form is pre-populated with placeholder data (e.g. the shipping address).
 4. The user checks out and completes the order.
 
-### 3. Preserve the simplicity of the GKE quickstart
+### 3. Preserve the simplicity of the Docker Compose quickstart
 
-New changes should not add additional complexity in the [main Online Boutique quickstart](https://github.com/GoogleCloudPlatform/microservices-demo#quickstart-gke).
+New changes should not add additional complexity in the [main Online Boutique quickstart](/README.md#quickstart-docker-compose).
 
 In particular, new changes should not add extra required steps or additional required tools in that quickstart.
 
-Ideally, extensions to Online Boutique's default functionality (such as a new microservice or a new cloud service integration) should be added as a [Kustomize Component](https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/kustomize/components) which users can optionally opt into.
+Ideally, extensions to Online Boutique's default functionality (such as a new microservice) should be optional, so that users opt into them rather than being required to run them.
